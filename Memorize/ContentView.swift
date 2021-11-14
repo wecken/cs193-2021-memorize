@@ -8,41 +8,62 @@
 import SwiftUI
 
 struct ContentView: View {
-  struct theme {
-    var car = ["🚗", "🚘", "🚙", "🚐", "🚌", "🚚", "🚛", "🚑", "🚒", "🏎", "🚓"]
-    var animals = ["🐼", "🦢", "🐔", "🐻", "🐶", "🐱", "🐧", "🐘", "🦒", "🦍", "🐵"]
-    var nature = ["⛰", "🌞", "🌀", "🌬", "🌕", "🍀", "🌊", "🌴", "🌷", "🌍", "⚡️"]
-  }
-//  var emojis = ["👹", "🎵", "🎤", "📛", "💻", "🌞", "⚡️", "☂️", "🍭", "🍎", "🍺", "🚗", "🍞", "🎮", "⛰", "💡", "📱", "💮" ]
-  @State var selectedTheme = theme().car
-  @State var emojiCount = 5
+
+  @State var characters = [
+    "アンパンマン",
+    "バイキンマン",
+    "ドキンちゃん",
+    "食パンマン",
+    "だだんだん",
+    "もぐりん",
+    "ジャムおじさん",
+    "コキンちゃん",
+    "ホラーマン",
+    "カビるんるん",
+    "バイキンユーホー",
+    "ドキンユーホー",
+    "コキンユーホー",
+    "ごろんごろ",
+  ]
+
+  @State var cardCount = 4
+  let columns = [
+    GridItem(.flexible()),
+    GridItem(.flexible()),
+  ]
+
     var body: some View {
-//      let emojis = theme()
+
       VStack{
-        Text("Memorize!").font(.largeTitle)
+        Text("アンパンマンカード!").font(.largeTitle)
         ScrollView {
-          LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]){
-            ForEach(selectedTheme[0..<emojiCount], id: \.self) { emoji in
-              CardView(content: emoji).aspectRatio(2/3, contentMode: .fit)
-            }
+          LazyVGrid(columns: columns, spacing: 8){
+            ForEach(characters.shuffled(), id: \.self) { character in
+              CardView(content:
+                        Image(character), name: character)
+                          .aspectRatio(2/3, contentMode: .fill)
+                          .padding()
+
           }
-          .padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
         }
           .font(.largeTitle)
-          .padding()
-        Spacer()
-        themeSelections
-      }
-    }
-  var themeSelections: some View {
-    HStack{
-      themeSelectButton(title: "Car", image: Image(systemName: "car"), action: {selectedTheme = theme().car})
-      themeSelectButton(title: "Animals", image: Image(systemName: "pawprint.fill"), action: {selectedTheme = theme().animals})
-      themeSelectButton(title: "Nature", image: Image(systemName: "leaf"), action: {selectedTheme = theme().nature})
-    }
-    .frame(maxWidth: .infinity)
-  }
 
+      }
+        ShuffleButton(action:{
+          characters.shuffle()
+        })
+    }
+  }
+  
+  struct ShuffleButton: View {
+    var action = {}
+    var body: some View {
+      Button(action: action, label: {
+        Text("まぜる")
+      })
+    }
+  }
+  
   struct themeSelectButton: View {
     var title: String
     let image: Image
@@ -64,8 +85,8 @@ struct ContentView: View {
   }
   var remove: some View {
     Button(action: {
-      if emojiCount > 1 {
-        emojiCount -= 1
+      if cardCount > 1 {
+        cardCount -= 1
       }
     }, label: {
       Image(systemName: "minus.circle")
@@ -74,8 +95,8 @@ struct ContentView: View {
   var add: some View {
     return Button(
       action: {
-      if emojiCount < selectedTheme.count {
-        emojiCount += 1
+      if cardCount < characters.count {
+        cardCount += 1
       }
     },
       label: {
@@ -86,22 +107,48 @@ struct ContentView: View {
 
 struct CardView: View {
   @State var isFaceUp: Bool = true
-  var content: String
+  var content: Image
+  var name: String
+  let cornerRadius: CGFloat = 8
   var body: some View {
     ZStack {
-      let shape = RoundedRectangle(cornerRadius: 20)
+
+      let shape = RoundedRectangle(cornerRadius: cornerRadius)
       if isFaceUp {
-        shape.fill(.white)
-        shape.strokeBorder(lineWidth: 2)
-        Text(content)
-          .font(.largeTitle)
+        ZStack {
+          shape
+          VStack {
+            ZStack(alignment: .center) {
+              content
+                .resizable()
+                .scaledToFit()
+              //TODO: Card size differs when flipped.
+              //TODO: Image should have 1/1 aspect, and should be cropped by aspectFill mode. 
+            }
+            Spacer()
+            Text(name)
+              .minimumScaleFactor(0.01)
+              .foregroundColor(.black)
+              .font(.body)
+              .padding()
+              .frame(maxWidth: .infinity)
+              .background(Color.init(.sRGB, red: 1, green: 1, blue: 1, opacity: 0.9))
+          }
+          .clipped()
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .foregroundColor(.white)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
-        Text(" ")
-          .font(.largeTitle)
-        shape.fill()
+        ZStack {
+          shape.foregroundColor(.white)
+          Image("cover").resizable().scaledToFill()
+        }
       }
     }
-    .foregroundColor(/*@START_MENU_TOKEN@*/.red/*@END_MENU_TOKEN@*/)
+    .cornerRadius(cornerRadius)
+    .clipped()
+    .shadow(radius: 8)
     .onTapGesture {
       isFaceUp = !isFaceUp
     }
