@@ -109,7 +109,7 @@ struct ContentView_Previews: PreviewProvider {
         .previewInterfaceOrientation(.portrait)
         ContentView()
           .preferredColorScheme(.light)
-          .previewInterfaceOrientation(.portrait)
+          .previewInterfaceOrientation(.landscapeLeft)
       }
       ContentView()
         .preferredColorScheme(.dark)
